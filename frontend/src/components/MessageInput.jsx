@@ -1,50 +1,54 @@
 import { useState } from "react";
 
 export default function MessageInput({ onSend }) {
-  const [text, setText] = useState("");
+  const [input, setInput] = useState("");
 
   const handleSend = () => {
-    if (!text.trim()) return;
-    onSend(text);
-    setText("");
+    if (!input.trim()) return;
+    onSend(input); // ✅ correct prop
+    setInput("");
   };
 
   return (
     <div style={container}>
       <input
-        style={input}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="How are you feeling today?"
+        style={inputStyle}
+        type="text"
+        placeholder="Type how you're feeling..."
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
       />
-      <button style={button} onClick={handleSend}>
+      <button style={btn} onClick={handleSend}>
         Send
       </button>
     </div>
   );
 }
 
+/* ---- styles ---- */
 const container = {
   display: "flex",
   gap: "10px",
-  padding: "12px",
-  borderTop: "1px solid #e5e7eb",
+  padding: "12px 20px",
+  background: "#000",
 };
 
-const input = {
+const inputStyle = {
   flex: 1,
-  padding: "10px",
-  borderRadius: "8px",
-  border: "1px solid #d1d5db",
+  padding: "14px",
+  borderRadius: "14px",
+  border: "1px solid #222",
+  background: "#111",
+  color: "white",
   outline: "none",
 };
 
-const button = {
-  padding: "10px 16px",
-  borderRadius: "8px",
+const btn = {
+  padding: "12px 20px",
+  borderRadius: "14px",
   border: "none",
-  background: "#4f46e5",
+  background: "#6c5ce7",
   color: "white",
   cursor: "pointer",
 };
