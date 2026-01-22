@@ -1,3 +1,0 @@
-﻿# AI-Powered-Mental-Health-Companion
-# AI-Powered-Mental-Health-Companion
-
