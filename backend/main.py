@@ -7,9 +7,16 @@ from routes.chat_hybrid import router as hybrid_router
 
 app = FastAPI(title="Real Backend Saathi")
 
+# ✅ Proper CORS configuration for production
+origins = [
+    "http://localhost:5173",
+    "https://saathi-ai-sigma.vercel.app",
+    "https://saathi-18eu2xckd-aditya-bobades-projects.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
