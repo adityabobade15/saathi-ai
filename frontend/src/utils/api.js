@@ -1,13 +1,13 @@
-const API_URL = `${import.meta.env.VITE_API_URL}/chat`;
+const API_BASE = "https://saathi-ai-iaq6.onrender.com";
 
 export async function sendChatMessage(message) {
-  const res = await fetch(API_URL, {
+  const res = await fetch(`${API_BASE}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: message || ""
+      message: message || "",
     }),
   });
 
