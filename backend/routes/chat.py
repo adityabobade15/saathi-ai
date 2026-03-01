@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from utils.ollama import ask_mistral
+from utils.groq_client import ask_mixtral
 
 # ===== In-memory user memory (MVP) =====
 # Later you can move this to Firebase / DB
@@ -71,7 +71,7 @@ def chat(req: ChatRequest):
 
     # ===== Auto-conversation starter =====
     if not user_message:
-        reply = ask_mistral(
+        reply = ask_mixtral(
             "Start conversation yourself. Be cute, soft, teen-friendly. "
             "Ask about the user's day in 1–2 lines with emojis."
         )
@@ -93,7 +93,7 @@ def chat(req: ChatRequest):
 
     # ===== Soft response for emotional distress (NO popup) =====
     if crisis_level == 1:
-        reply = ask_mistral(
+        reply = ask_mixtral(
             f"The user feels emotionally overwhelmed. "
             f"Be extra gentle and supportive. "
             f"Ask one soft question.\nUser: {user_message}"
@@ -105,7 +105,7 @@ def chat(req: ChatRequest):
     if previous_emotion and previous_emotion != "neutral":
         context = f"Earlier the user felt {previous_emotion}. Be mindful of this.\n"
 
-    reply = ask_mistral(
+    reply = ask_mixtral(
         f"{context}User says: {user_message}\n"
         f"Reply in short, cute, caring style."
     )
