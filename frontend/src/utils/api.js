@@ -1,4 +1,4 @@
-const API_BASE = "https://saathi-ai-iaq6.onrender.com";
+const API_BASE = "https://saathi-ai-iaq6.onrender.com"; // ✅ correct backend
 
 export async function sendChatMessage(message) {
   const res = await fetch(`${API_BASE}/chat`, {
