@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
-import "../styles/Auth.css";
+import "../styles/auth.css";
 
 export default function Auth({ onLoginSuccess }) {
 
