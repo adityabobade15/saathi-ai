@@ -42,7 +42,7 @@ async function handleSubmit(e) {
 console.log("Firebase UID:", user.uid);
 
 const API_BASE = "https://saathi-ai-iaq6.onrender.com";
-await fetch(`${API_BASE}/api/users/create`, {
+await fetch(`${API_BASE}/users/create`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
