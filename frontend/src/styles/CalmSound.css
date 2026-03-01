@@ -1,0 +1,66 @@
+.calm-card {
+  background: #f6f8ff;
+  border-radius: 22px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+}
+
+.calm-card h2 {
+  margin: 0 0 6px;
+  color: #4338ca;
+}
+
+.calm-card p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.sound-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sound-btn {
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  background: #e0e7ff;
+  color: #1e1b4b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sound-btn:hover {
+  background: #c7d2fe;
+}
+
+.sound-btn.active {
+  background: #a5b4fc;
+}
+
+.pause-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  background: #fde68a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.close-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 16px;
+  border: none;
+  background: #e5e7eb;
+  cursor: pointer;
+}

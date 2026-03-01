@@ -1,0 +1,215 @@
+/* ================= OVERLAY (LIKE MEDITATION) ================= */
+
+.selftalk-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(247, 249, 252, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* ================= CARD ================= */
+
+.selftalk-card {
+  background: #ffffff;
+  width: 90%;
+  max-width: 420px;
+  padding: 36px;
+  border-radius: 28px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+/* ================= TITLE ================= */
+
+.selftalk-card h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1f2937;
+}
+
+/* ================= OPTIONS ================= */
+
+.selftalk-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.option {
+  padding: 16px;
+  border-radius: 18px;
+  background: #f1f5f9;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.option:hover {
+  background: #e2e8f0;
+}
+
+/* ================= SCRIPT TEXT ================= */
+
+.selftalk-text {
+  font-size: 16px;
+  margin: 30px 0;
+  min-height: 60px;
+  line-height: 1.6;
+  color: #334155;
+}
+
+/* ================= DOTS ================= */
+
+.selftalk-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.selftalk-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5f5;
+  transition: 0.3s;
+}
+
+.selftalk-dots .active {
+  background: #6fa0dc;
+  transform: scale(1.2);
+}
+
+/* ================= BUTTON ================= */
+
+.close-inline {
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: 20px;
+  border: none;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.close-inline:hover {
+  background: #e2e8f0;
+}
+/* Bottom section */
+.selftalk-bottom {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Meditation-style back button */
+.back-btn {
+  padding: 14px 26px;
+  border-radius: 999px;              /* fully rounded pill */
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.back-btn:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+/* ================= ANXIETY (Soft Blue) ================= */
+
+.selftalk-card.anxiety {
+  background: linear-gradient(180deg, #eff6ff, #dbeafe);
+}
+
+.option.anxiety {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.option.anxiety:hover {
+  background: #bfdbfe;
+}
+
+.selftalk-card.anxiety h2 {
+  color: #1e3a8a;
+}
+/* ================= OVERTHINKING (Lavender) ================= */
+
+.selftalk-card.overthinking {
+  background: linear-gradient(180deg, #f5f3ff, #ede9fe);
+}
+
+.option.overthinking {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.option.overthinking:hover {
+  background: #ddd6fe;
+}
+
+.selftalk-card.overthinking h2 {
+  color: #5b21b6;
+}
+/* ================= SELF DOUBT (Soft Green) ================= */
+
+.selftalk-card.doubt {
+  background: linear-gradient(180deg, #ecfdf5, #d1fae5);
+}
+
+.option.doubt {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.option.doubt:hover {
+  background: #a7f3d0;
+}
+
+.selftalk-card.doubt h2 {
+  color: #065f46;
+}
+.selftalk-card.anxiety .back-btn {
+  background: #bfdbfe;
+  color: #1e3a8a;
+}
+
+.selftalk-card.anxiety .back-btn:hover {
+  background: #93c5fd;
+  transform: translateY(-2px);
+}
+.selftalk-card.overthinking .back-btn {
+  background: #ddd6fe;
+  color: #5b21b6;
+}
+
+.selftalk-card.overthinking .back-btn:hover {
+  background: #c4b5fd;
+  transform: translateY(-2px);
+}
+.selftalk-card.doubt .back-btn {
+  background: #a7f3d0;
+  color: #065f46;
+}
+
+.selftalk-card.doubt .back-btn:hover {
+  background: #6ee7b7;
+  transform: translateY(-2px);
+}

@@ -1,123 +1,423 @@
-import { useState } from "react";
-import Header from "../components/Header";
-import Message from "../components/Message";
-import MessageInput from "../components/MessageInput";
-import Typing from "../components/Typing";
-import CrisisModal from "../components/CrisisModal";
-import BreathingModal from "../components/BreathingModal";
-import GroundingModal from "../components/GroundingModal";
-import { saveMoodFromChat } from "../utils/moodSync";
+import { useState, useEffect, useRef } from "react";
+import "../styles/Chat.css";
+import Breathe from "../components/Breathe";
+import Ground from "../components/Ground";
+import Dashboard from "../components/Dashboard";
+import { sendChatMessage } from "../utils/api";
+import CalmSound from "../components/CalmSound";
+import { auth, db } from "../firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import MeditationCarousel from "../components/MeditationCarousel";
+import { Mic } from "lucide-react";
+import PositiveSelfTalk from "../components/PositiveSelfTalk";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
-
-export default function Chat() {
+export default function Chat({ onSignOut }) {
   const [messages, setMessages] = useState([
-    {
-      sender: "bot",
-      text: "Hey… I’m here with you 💗 How are you feeling right now?",
-    },
+    { from: "ai", text: "Hi, I’m Saathi 🌱 I’m here with you." },
   ]);
-
-  const [typing, setTyping] = useState(false);
+  const [input, setInput] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showBreathe, setShowBreathe] = useState(false);
+  const [showGround, setShowGround] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [emotions, setEmotions] = useState([]);
   const [showCrisis, setShowCrisis] = useState(false);
-  const [showBreathing, setShowBreathing] = useState(false);
-  const [showGrounding, setShowGrounding] = useState(false);
-  const [lastEmotion, setLastEmotion] = useState("neutral");
+  const [isTyping, setIsTyping] = useState(false);
+  const [showCalm, setShowCalm] = useState(false);
+  const [showMeditation, setShowMeditation] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [showVoiceCard, setShowVoiceCard] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [showSelfTalk, setShowSelfTalk] = useState(false);
+  const chatEndRef = useRef(null);
+  
+  /* ===== EMOTION DETECTOR (CHAT ONLY) ===== */
+  const detectEmotionFromText = (text) => {
+    const t = text.toLowerCase();
 
-  const sendMessage = async (text) => {
-    setMessages((prev) => [...prev, { sender: "user", text }]);
-    saveMoodFromChat(text);
-    setTyping(true);
+    if (t.includes("happy") || t.includes("good") || t.includes("great"))
+      return { emoji: "😄", label: "Happy" };
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/chat/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
-      });
+    if (t.includes("calm") || t.includes("relaxed"))
+      return { emoji: "😊", label: "Calm" };
 
-      const data = await res.json();
-      setTyping(false);
+    if (t.includes("sad") || t.includes("down"))
+      return { emoji: "😔", label: "Sad" };
 
-      const emotion = data?.emotion?.label || "neutral";
-      setLastEmotion(emotion);
+    if (t.includes("anxious") || t.includes("nervous"))
+      return { emoji: "😟", label: "Anxious" };
 
-      if (data.crisis) setShowCrisis(true);
-      if (emotion === "fear" || emotion === "anxiety")
-        setTimeout(() => setShowBreathing(true), 700);
+    if (t.includes("angry") || t.includes("mad"))
+      return { emoji: "😡", label: "Angry" };
 
-      setMessages((prev) => [...prev, { sender: "bot", text: data.reply }]);
-    } catch (err) {
-      setTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "⚠️ Unable to connect to server." },
-      ]);
-      console.error(err);
+    return null;
+  };
+  
+const saveChatToFirestore = async (userText, aiReply) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    await addDoc(
+      collection(db, "users", user.uid, "chats"),
+      {
+        message: userText,
+        reply: aiReply,
+        createdAt: serverTimestamp(),
+      }
+    );
+
+    console.log("✅ Chat saved to Firestore");
+  } catch (error) {
+    console.error("❌ Error saving chat:", error);
+  }
+};
+  /* ===== SEND MESSAGE (BACKEND CONNECTED) ===== */
+  const sendMessage = async () => {
+  if (!input.trim()) return;
+
+  const userText = input;
+  const detectedEmotion = detectEmotionFromText(userText);
+
+  // Add user message instantly
+  setMessages((prev) => [...prev, { from: "user", text: userText }]);
+  setIsTyping(true);
+  setInput("");
+
+  if (detectedEmotion) {
+    setEmotions((prev) => [
+      ...prev,
+      { ...detectedEmotion, time: new Date().toLocaleString() },
+    ]);
+  }
+
+  try {
+    const data = await sendChatMessage(userText);
+
+    setIsTyping(false);
+
+    // Add AI reply
+    setMessages((prev) => [
+      ...prev,
+      { from: "ai", text: data.reply },
+    ]);
+
+    // 🔥 SAVE TO FIRESTORE
+    await saveChatToFirestore(userText, data.reply);
+
+    if (data.crisis === true) {
+      setShowCrisis(true);
     }
+
+  } catch (err) {
+    setIsTyping(false);
+
+    setMessages((prev) => [
+      ...prev,
+      { from: "ai", text: "I’m having trouble connecting right now 💙" },
+    ]);
+  }
+};
+
+  const openBreathe = () => {
+    setShowGround(false);
+    setShowDashboard(false);
+    setShowBreathe(true);
+    setSidebarOpen(false);
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    setSidebarOpen(false);
+  };
+  
+  useEffect(() => {
+  chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages, isTyping]);
+  
+let recognition;
+
+const startListening = () => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Speech recognition not supported");
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = true;
+
+  setTranscript("");
+  setShowVoiceCard(true);
+  setIsListening(true);
+
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    let text = "";
+    for (let i = 0; i < event.results.length; i++) {
+      text += event.results[i][0].transcript;
+    }
+    setTranscript(text);
+  };
+
+  recognition.onerror = () => {
+    setIsListening(false);
+  };
+};
+const stopListening = () => {
+  if (recognition) recognition.stop();
+  setIsListening(false);
+};
+
+const handleVoiceDone = () => {
+  stopListening();
+  setInput(transcript);
+  setShowVoiceCard(false);
+};
+
   return (
-    <div style={page}>
-      <Header />
+    <div className="chat-page">
+      {/* HEADER */}
+      <header className="chat-header">
+        <button className="menu-btn" onClick={() => setSidebarOpen(true)}>
+          ☰
+        </button>
+        <div className="header-brand">
+          <h1>Saathi</h1>
+          <span>A calm space to talk and heal</span>
+        </div>
+      </header>
 
-      <div style={chatBox}>
-        {messages.map((m, i) => (
-          <Message key={i} sender={m.sender} text={m.text} />
-        ))}
-        {typing && <Typing />}
+      {/* BODY */}
+      <div className="chat-layout">
+        {/* SIDEBAR */}
+        <aside
+          className={`chat-sidebar ${sidebarOpen ? "open" : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="sidebar-content">
+            <div className="sidebar-item" onClick={openBreathe}>
+              🫁 Breath
+            </div>
+
+            <div
+              className="sidebar-item"
+              onClick={() => {
+                setShowBreathe(false);
+                setShowDashboard(false);
+                setShowGround(true);
+                setSidebarOpen(false);
+              }}
+            >
+              🌱 Ground
+            </div>
+
+            <div
+              className="sidebar-item"
+              onClick={() => {
+                setShowBreathe(false);
+                setShowGround(false);
+                setShowDashboard(true);
+                setSidebarOpen(false);
+              }}
+            >
+              📊 Dashboard
+            </div>
+             
+            <div
+            className="sidebar-item"
+            onClick={() => {
+            setShowBreathe(false);
+            setShowGround(false);
+            setShowDashboard(false);
+            setShowCalm(true);
+            setSidebarOpen(false);
+           }}
+          >
+           🎧 Calm Sound
+           </div>
+           <div className="sidebar-item danger" onClick={clearChat}>
+           🧹 Clear Chat
+           </div>
+           
+           <div
+           className="sidebar-item"
+           onClick={() => {
+           setShowBreathe(false);
+           setShowGround(false);
+           setShowDashboard(false);
+           setShowCalm(false);
+           setShowMeditation(true);
+           setSidebarOpen(false);
+        }}
+        >
+           🧘 Mindful Meditation
+          </div>
+          
+          <div
+          className="sidebar-item"
+          onClick={() => {
+          setShowSelfTalk(true);
+          setSidebarOpen(false);
+         }}
+   >
+          🗣 Positive Self-Talk
+         </div>
+
+
+            <div className="sidebar-item signout" onClick={onSignOut}>
+              🚪 Sign Out
+            </div>
+          </div>
+        </aside>
+
+        {/* CHAT */}
+        <main className="chat-container" onClick={() => setSidebarOpen(false)}>
+          <div className="chat-messages">
+  {messages.map((msg, i) => (
+    <div key={i} className={`bubble ${msg.from}`}>
+      {msg.text}
+    </div>
+  ))}
+
+  {isTyping && (
+  <div className="bubble ai typing">
+    <div className="typing-indicator">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+)}
+
+  <div ref={chatEndRef} />
+</div>
+
+
+          {showBreathe && (
+            <div className="breathe-inline" onClick={(e) => e.stopPropagation()}>
+              <Breathe onClose={() => setShowBreathe(false)} />
+            </div>
+          )}
+
+          {showGround && (
+            <div className="breathe-inline" onClick={(e) => e.stopPropagation()}>
+              <Ground onClose={() => setShowGround(false)} />
+            </div>
+          )}
+
+          {showDashboard && (
+            <div className="breathe-inline" onClick={(e) => e.stopPropagation()}>
+              <Dashboard
+                emotions={emotions}
+                onClose={() => setShowDashboard(false)}
+              />
+            </div>
+          )}
+         
+        {showSelfTalk && (
+        <div className="breathe-inline">
+        <PositiveSelfTalk onClose={() => setShowSelfTalk(false)} />
+        </div>
+        )}
+
+
+          {showCrisis && (
+          <div className="crisis-overlay">
+          <div className="crisis-card">
+          <h2>You are not alone 💙</h2>
+
+      <p>
+        I’m really glad you spoke up. What you’re feeling matters,
+        and help is available right now.
+      </p>
+
+      <div className="crisis-info">
+        <p><strong>India – 24/7 Helpline</strong></p>
+        <p>📞 AASRA: 91-9820466726</p>
       </div>
 
-      <div style={actions}>
-        <button style={btn} onClick={() => setShowBreathing(true)}>
-          🌬 Breathe
-        </button>
-        <button style={btn} onClick={() => setShowGrounding(true)}>
-          🌱 Ground
-        </button>
+      <a
+        className="map-btn"
+        href="https://www.google.com/maps/search/therapist+near+me/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        📍 Find Therapist Near Me
+      </a>
+
+      <button
+        className="safe-btn"
+        onClick={() => setShowCrisis(false)}
+      >
+        I’m safe for now
+      </button>
+    </div>
+  </div>
+)}
+          {showCalm && (
+          <div className="breathe-inline" onClick={(e) => e.stopPropagation()}>
+          <CalmSound onClose={() => setShowCalm(false)} />
+          </div>
+        )}
+          {showMeditation && (
+           <div className="breathe-inline" onClick={(e) => e.stopPropagation()}>
+           <MeditationCarousel onClose={() => setShowMeditation(false)} />
+          </div>
+          )}
+         {showVoiceCard && (
+  <div className="voice-overlay">
+    <div className="voice-card">
+      <h3>Voice Input</h3>
+
+      {isListening && (
+        <div className="wave">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      )}
+
+      <p className="voice-text">
+        {transcript || "Start speaking..."}
+      </p>
+
+      <button className="voice-done" onClick={handleVoiceDone}>
+        Done
+      </button>
+    </div>
+  </div>
+)}
+          <div className="chat-input">
+         <input
+  placeholder="Type or speak how you feel…"
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+  autoCorrect="on"
+  autoCapitalize="sentences"
+  spellCheck={true}
+  inputMode="text"
+  enterKeyHint="send"
+/>
+
+         <button
+         className={`mic-btn ${isListening ? "listening" : ""}`}
+         onClick={startListening}
+         >
+         <Mic size={18} strokeWidth={2} />
+         </button>
+
+        <button onClick={sendMessage}>Send</button>
+        </div>
+        </main>
       </div>
-
-      <MessageInput onSend={sendMessage} />
-
-      <CrisisModal open={showCrisis} onClose={() => setShowCrisis(false)} />
-      <BreathingModal
-        open={showBreathing}
-        onClose={() => setShowBreathing(false)}
-        emotion={lastEmotion}
-      />
-      <GroundingModal
-        open={showGrounding}
-        onClose={() => setShowGrounding(false)}
-      />
     </div>
   );
 }
-
-/* ---- styles ---- */
-const page = {
-  minHeight: "100vh",
-  background: "#000",
-  display: "flex",
-  flexDirection: "column",
-};
-
-const chatBox = {
-  flex: 1,
-  padding: "20px",
-  overflowY: "auto",
-};
-
-const actions = {
-  display: "flex",
-  gap: "10px",
-  padding: "10px 20px",
-};
-
-const btn = {
-  background: "#111",
-  color: "white",
-  border: "1px solid #222",
-  borderRadius: "10px",
-  padding: "8px 14px",
-  cursor: "pointer",
-};

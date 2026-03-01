@@ -1,0 +1,100 @@
+/* SAME BASE AS GROUND */
+.dashboard-card {
+  width: 100%;
+  max-width: 420px;
+  height: 460px;                 /* 🔑 fixed height */
+  background: #f4f6fb;
+  border-radius: 22px;
+  padding: 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* TITLE */
+.ground-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  color: #3f3d56;
+}
+
+.ground-subtitle {
+  margin: 0;
+  font-size: 14px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* 🔽 SCROLL AREA */
+.dashboard-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* EMPTY */
+.emotion-empty {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* EMOTION ROW */
+.emotion-row {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LEFT SIDE */
+.emotion-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emotion-emoji {
+  font-size: 22px;
+}
+
+.emotion-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* TIME */
+.emotion-time {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* CLOSE BUTTON (MATCH GROUND) */
+.ground-close {
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  background: #c7d2fe;
+  color: #1e3a8a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.ground-close:hover {
+  background: #b4c0fa;
+}

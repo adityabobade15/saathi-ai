@@ -1,41 +1,27 @@
 import { useState } from "react";
+import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
-import Dashboard from "./pages/Dashboard";
 
-export default function App() {
-  const [page, setPage] = useState("chat"); // "chat" | "dashboard"
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
 
-  return (
-    <>
-      {page === "chat" && (
-        <>
-          <Chat />
-          {/* FLOATING DASHBOARD BUTTON */}
-          <button
-            style={dashboardBtn}
-            onClick={() => setPage("dashboard")}
-          >
-            📊 Dashboard
-          </button>
-        </>
-      )}
-
-      {page === "dashboard" && (
-        <Dashboard onBack={() => setPage("chat")} />
-      )}
-    </>
+  return isLoggedIn ? (
+    <Chat
+      userName={userName}
+      onSignOut={() => {
+        setIsLoggedIn(false);
+        setUserName("");
+      }}
+    />
+  ) : (
+    <Auth
+      onLoginSuccess={(name) => {
+        setUserName(name);
+        setIsLoggedIn(true);
+      }}
+    />
   );
 }
 
-const dashboardBtn = {
-  position: "fixed",
-  bottom: "20px",
-  right: "20px",
-  background: "#6c63ff",
-  color: "white",
-  border: "none",
-  borderRadius: "14px",
-  padding: "14px 18px",
-  cursor: "pointer",
-  fontSize: "15px",
-};
+export default App;

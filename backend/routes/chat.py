@@ -1,50 +1,116 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
+from utils.ollama import ask_mistral
 
-from models.emotion_model import detect_emotion
-from models.sentiment_model import analyze_sentiment
-from utils.crisis_check import check_crisis
+# ===== In-memory user memory (MVP) =====
+# Later you can move this to Firebase / DB
+USER_MEMORY = {}
 
-chat_router = APIRouter()
+router = APIRouter()
 
-# ✅ Request body schema (VERY IMPORTANT)
+
 class ChatRequest(BaseModel):
-    message: str
+    message: str | None = ""
 
 
-@chat_router.post("/")
-def chat(payload: ChatRequest):
-    text = payload.message.strip()
+class ChatResponse(BaseModel):
+    reply: str
+    crisis: bool
 
-    if not text:
-        raise HTTPException(status_code=400, detail="Message cannot be empty")
 
-    # Crisis detection
-    crisis = check_crisis(text)
+# ===== Smarter Crisis Detection =====
+def detect_crisis_level(text: str) -> int:
+    t = text.lower()
 
-    # Emotion detection
-    emotions = detect_emotion(text)
-    emotion = emotions[0] if emotions else {"label": "neutral", "score": 0.0}
+    strong_signals = [
+        "kill myself",
+        "end my life",
+        "suicide",
+        "self harm",
+        "want to die",
+        "die today",
+    ]
 
-    # Sentiment analysis
-    sentiment = analyze_sentiment(text)
+    medium_signals = [
+        "no reason to live",
+        "tired of living",
+        "life is pointless",
+        "can't go on",
+        "want to disappear",
+    ]
 
-    # Reply logic
-    if crisis:
-        reply = (
-            "I'm really sorry you're feeling this way. "
-            "You are not alone. Please reach out to someone you trust "
-            "or a mental health helpline immediately."
+    if any(p in t for p in strong_signals):
+        return 2  # 🚨 real crisis
+
+    if any(p in t for p in medium_signals):
+        return 1  # ⚠️ emotional distress
+
+    return 0
+
+
+# ===== Simple Emotion Detection =====
+def detect_emotion(text: str) -> str:
+    t = text.lower()
+
+    if any(w in t for w in ["sad", "low", "down", "lonely"]):
+        return "sad"
+
+    if any(w in t for w in ["stress", "stressed", "anxious", "panic"]):
+        return "anxious"
+
+    if any(w in t for w in ["happy", "good", "fine"]):
+        return "happy"
+
+    return "neutral"
+
+
+@router.post("/chat", response_model=ChatResponse)
+def chat(req: ChatRequest):
+    user_message = (req.message or "").strip()
+    user_id = "default"  # 🔐 later replace with real user/session id
+
+    # ===== Auto-conversation starter =====
+    if not user_message:
+        reply = ask_mistral(
+            "Start conversation yourself. Be cute, soft, teen-friendly. "
+            "Ask about the user's day in 1–2 lines with emojis."
         )
-    else:
-        reply = (
-            f"It seems like you're feeling {emotion['label']}. "
-            "Do you want to talk about it?"
+        return {"reply": reply, "crisis": False}
+
+    # ===== Crisis detection =====
+    crisis_level = detect_crisis_level(user_message)
+
+    # ===== Emotion detection =====
+    emotion = detect_emotion(user_message)
+
+    # ===== Update memory =====
+    USER_MEMORY[user_id] = {
+        "last_emotion": emotion,
+        "last_topic": user_message[:50],
+    }
+
+    previous_emotion = USER_MEMORY.get(user_id, {}).get("last_emotion")
+
+    # ===== Soft response for emotional distress (NO popup) =====
+    if crisis_level == 1:
+        reply = ask_mistral(
+            f"The user feels emotionally overwhelmed. "
+            f"Be extra gentle and supportive. "
+            f"Ask one soft question.\nUser: {user_message}"
         )
+        return {"reply": reply, "crisis": False}
+
+    # ===== Normal / Crisis-level response =====
+    context = ""
+    if previous_emotion and previous_emotion != "neutral":
+        context = f"Earlier the user felt {previous_emotion}. Be mindful of this.\n"
+
+    reply = ask_mistral(
+        f"{context}User says: {user_message}\n"
+        f"Reply in short, cute, caring style."
+    )
 
     return {
         "reply": reply,
-        "emotion": emotion,
-        "sentiment": sentiment,
-        "crisis": crisis
+        "crisis": crisis_level == 2,  # 🚨 popup only for real crisis
     }

@@ -1,0 +1,405 @@
+* {
+  box-sizing: border-box;
+  font-family: "DM Sans", sans-serif;
+}
+
+html, body {
+  height: auto;   /* allow natural height */
+  margin: 0;
+}
+
+body {
+  background: #f7f9fc;
+  color: #1f2937;
+}
+
+/* ================= PAGE ================= */
+
+.chat-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ================= HEADER ================= */
+
+.chat-header {
+  background: #ffffff;
+  padding: 18px 24px;
+  border-radius: 18px;
+  margin: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.header-brand h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.header-brand span {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ================= LAYOUT ================= */
+
+.chat-layout {
+  flex: 1;
+  display: flex;
+  gap: 18px;
+  padding: 0 14px 14px;
+  min-height: 0; /* 🔑 REQUIRED */
+}
+
+/* ================= SIDEBAR ================= */
+
+.chat-sidebar {
+  width: 260px;
+  background: #9dbbe2;
+  border-radius: 28px;
+  padding: 18px;
+  display: flex;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.sidebar-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-item {
+  background: #b9d0ee;
+  padding: 16px;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.25s ease;
+}
+
+.sidebar-item:hover {
+  background: #c7dbf3;
+}
+
+.sidebar-item.danger {
+  background: #c79aa6;
+  color: #fff;
+}
+
+.sidebar-item.signout {
+  margin-top: auto;
+  background: #e6eef9;
+}
+
+/* ================= CHAT ================= */
+
+.chat-container {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ✅ ONLY THIS SCROLLS */
+.chat-messages {
+  flex: 1;
+  min-height: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* ================= INPUT ================= */
+
+.chat-input {
+  padding: 20px;
+  display: flex;
+  gap: 14px;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: none;
+  background: #f1f5f9;
+  font-size: 14px;
+}
+
+.chat-input input:focus {
+  outline: none;
+}
+
+.chat-input button {
+  padding: 16px 22px;
+  border-radius: 16px;
+  border: none;
+  background: #6fa0dc;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ================= CHAT BUBBLES ================= */
+
+.bubble {
+  max-width: 70%;
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.bubble.ai {
+  background: #f2ecfb;
+  color: #4b2d83;
+  margin-right: auto;
+  border-top-left-radius: 6px;
+}
+
+.bubble.user {
+  background: #ede9fe;
+  color: #3730a3;
+  margin-left: auto;
+  border-top-right-radius: 6px;
+}
+
+/* ===== NEW TYPING STYLE ===== */
+
+.typing {
+  padding: 14px 18px;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 5px;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: #7c3aed;
+  border-radius: 50%;
+  animation: blink 1.4s infinite both;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 900px) {
+  .menu-btn {
+    display: block;
+  }
+
+  .chat-sidebar {
+    position: fixed;
+    top: 90px;
+    left: 10px;
+    bottom: 10px;
+    transform: translateX(-120%);
+    transition: transform 0.3s ease;
+    z-index: 20;
+  }
+
+  .chat-sidebar.open {
+    transform: translateX(0);
+  }
+}
+/* ================= FORCE CENTER ALL OVERLAYS ================= */
+
+/* This forces Ground / CalmSound / Dashboard to behave EXACTLY like Breathe */
+
+/* ================= CENTER OVERLAY WITHOUT BREAKING LAYOUT ================= */
+
+.breathe-inline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(247, 249, 252, 0.75);
+  z-index: 999;
+}
+
+/* ONLY control position, NOT layout */
+.breathe-inline > * {
+  margin: auto;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+/* ================= CENTER CRISIS ALERT PERFECTLY ================= */
+
+.crisis-overlay {
+  position: absolute;          /* SAME as breathe-inline */
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(247, 249, 252, 0.75);
+  z-index: 10000;
+}
+
+/* Card stays centered */
+.crisis-card {
+  margin: 0 auto;
+  max-width: 420px;
+  width: 90%;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+/* ================= CRISIS ACTIONS STACK FIX ================= */
+
+/* Therapist link */
+.map-btn {
+  display: block;          /* ⬅️ forces new line */
+  width: 80%;
+  margin: 16px auto 10px;  /* center + space below */
+  text-align: center;
+}
+
+/* ================= IMPROVED SAFE BUTTON ================= */
+
+.safe-btn {
+  display: block;
+  width: 80%;
+  margin: 12px auto 0;
+
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: none;
+
+  background: #eef2f7;        /* very soft neutral */
+  color: #1f2937;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+/* gentle reassurance on hover */
+.safe-btn:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+/* calm press feedback */
+.safe-btn:active {
+  transform: scale(0.98);
+}
+
+.voice-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(247, 249, 252, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.voice-card {
+  background: white;
+  padding: 30px;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+}
+
+.voice-text {
+  margin: 20px 0;
+  font-size: 14px;
+  color: #6b7280;
+  min-height: 40px;
+}
+
+.voice-done {
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: none;
+  background: #6fa0dc;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* ================= VOICE WAVE ================= */
+
+.wave {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 20px 0;
+  height: 40px;
+}
+
+.wave span {
+  width: 6px;
+  height: 10px;
+  background: #6fa0dc;
+  border-radius: 4px;
+  animation: waveAnim 1s infinite ease-in-out;
+}
+
+/* Delay each bar */
+.wave span:nth-child(1) { animation-delay: 0s; }
+.wave span:nth-child(2) { animation-delay: 0.1s; }
+.wave span:nth-child(3) { animation-delay: 0.2s; }
+.wave span:nth-child(4) { animation-delay: 0.3s; }
+.wave span:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes waveAnim {
+  0% { height: 10px; }
+  50% { height: 30px; }
+  100% { height: 10px; }
+}
