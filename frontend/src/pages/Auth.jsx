@@ -41,8 +41,9 @@ async function handleSubmit(e) {
 
 console.log("Firebase UID:", user.uid);
 
-// 🔗 SYNC USER WITH BACKEND (FastAPI → Firestore)
-await fetch("http://127.0.0.1:8000/api/users/create", {
+const API_BASE = import.meta.env.VITE_API_URL;
+
+await fetch(`${API_BASE}/api/users/create`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -54,7 +55,6 @@ await fetch("http://127.0.0.1:8000/api/users/create", {
   }),
 });
 
-// pass name to app
 onLoginSuccess(form.name || "Friend");
 
   } catch (error) {
