@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from backend.utils.groq_client import ask_mixtral
+from ..utils.groq_client import ask_mixtral
 # ===== In-memory user memory (MVP) =====
 # Later you can move this to Firebase / DB
 USER_MEMORY = {}
