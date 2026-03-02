@@ -9,3 +9,6 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+backend/config/firebase_key.json
+*.json
+dist

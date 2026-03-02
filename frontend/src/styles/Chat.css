@@ -6,7 +6,6 @@
 html, body {
   height: 100%;
   margin: 0;
-  overflow: hidden;
 }
 
 body {
@@ -17,10 +16,8 @@ body {
 /* ================= PAGE ================= */
 
 .chat-page {
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: #f7f9fc;
+  min-height: 100dvh;
+  overflow: hidden;   /* only chat page, not whole app */
 }
 
 /* ================= HEADER ================= */
