@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.users import router as users_router
@@ -25,9 +25,9 @@ app.add_middleware(
 def root():
     return {"status": "Backend running"}
 
-# ✅ ADD THIS
-@app.get("/health")
-def health():
+# Health endpoint for uptime monitoring
+@app.api_route("/health", methods=["GET", "HEAD"])
+async def health(request: Request):
     return {"status": "ok"}
 
 app.include_router(users_router)
