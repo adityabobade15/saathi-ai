@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
+import Welcome from "./pages/Welcome";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
