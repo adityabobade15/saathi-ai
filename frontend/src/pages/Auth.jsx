@@ -39,22 +39,27 @@ async function handleSubmit(e) {
 
     const user = userCredential.user;
 
-console.log("Firebase UID:", user.uid);
+    console.log("Firebase UID:", user.uid);
 
-const API_BASE = "https://saathi-ai-iaq6.onrender.com";
-await fetch(`${API_BASE}/users/create`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    uid: user.uid,
-    email: user.email,
-    name: form.name || "Friend",
-  }),
-});
+    const API_BASE = "https://saathi-ai-iaq6.onrender.com";
 
-onLoginSuccess(form.name || "Friend");
+    // Only create user in backend when signing up
+    if (mode === "signup") {
+      await fetch(`${API_BASE}/users/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: form.name || "Friend",
+        }),
+      });
+    }
+
+    // Continue to chat
+    onLoginSuccess(form.name || "Friend");
 
   } catch (error) {
     alert(error.message);
