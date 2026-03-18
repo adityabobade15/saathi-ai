@@ -417,23 +417,23 @@ body {
   align-items: center;
   justify-content: center;
 
-  background: #6fa0dc; /* SAME as mic button */
+  background: #6fa0dc; /* same as mic */
   color: white;
 
   cursor: pointer;
 
-  box-shadow: none; /* remove heavy shadow */
-  transition: background 0.2s ease;
+  box-shadow: none;
 }
 
-/* REMOVE color change on click */
+/* ❌ NO color change */
+.send-btn:hover,
 .send-btn:active,
 .send-btn:focus {
   background: #6fa0dc;
   outline: none;
 }
 
-/* prevent weird svg shift */
+/* center svg perfectly */
 .send-btn svg {
-  transform: rotate(-15deg);
+  display: block;
 }

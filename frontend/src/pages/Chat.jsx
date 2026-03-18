@@ -415,11 +415,24 @@ const handleVoiceDone = () => {
          </button>
 
         <button
-        className="send-btn"
-        onClick={sendMessage}
-    >
-        <Send size={22} strokeWidth={2.5} />
-        </button>
+  className="send-btn"
+  onClick={sendMessage}
+>
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <path
+      d="M4 12L20 12M20 12L14 6M20 12L14 18"
+      stroke="white"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+     </svg>
+     </button>
         </div>
         </main>
       </div>
