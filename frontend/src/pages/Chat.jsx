@@ -8,7 +8,7 @@ import CalmSound from "../components/CalmSound";
 import { auth, db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import MeditationCarousel from "../components/MeditationCarousel";
-import { Mic } from "lucide-react";
+import { Mic, Send } from "lucide-react";
 import PositiveSelfTalk from "../components/PositiveSelfTalk";
 
 export default function Chat({ onSignOut }) {
@@ -414,7 +414,12 @@ const handleVoiceDone = () => {
          <Mic size={18} strokeWidth={2} />
          </button>
 
-        <button onClick={sendMessage}>Send</button>
+        <button
+        className="send-btn"
+        onClick={sendMessage}
+    >
+        <Send size={18} strokeWidth={2} />
+        </button>
         </div>
         </main>
       </div>
