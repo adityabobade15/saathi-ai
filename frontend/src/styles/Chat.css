@@ -416,7 +416,7 @@ body {
   align-items: center;
   justify-content: center;
 
-  background: #25D366 !important;
+  background: #6fa0dc !important;  /* ✅ SAME AS MIC */
   color: white;
 
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
@@ -435,4 +435,7 @@ body {
 }
 .chat-input {
   align-items: center;
+}
+.send-btn svg {
+  display: block;
 }
