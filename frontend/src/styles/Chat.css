@@ -435,6 +435,5 @@ body {
 
 /* prevent weird svg shift */
 .send-btn svg {
-  display: block;
-  transform: rotate(0deg); /* force straight */
+  transform: rotate(-15deg);
 }
