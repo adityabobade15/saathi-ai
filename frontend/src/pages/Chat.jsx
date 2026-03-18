@@ -417,8 +417,8 @@ const handleVoiceDone = () => {
         <button
         className="send-btn"
         onClick={sendMessage}
-       >
-        <Send size={20} strokeWidth={2} style={{ transform: "rotate(0deg)" }} />
+    >
+        <Send size={22} strokeWidth={2.5} />
         </button>
         </div>
         </main>
