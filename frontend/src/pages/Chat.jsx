@@ -6,7 +6,15 @@ import Dashboard from "../components/Dashboard";
 import { sendChatMessage } from "../utils/api";
 import CalmSound from "../components/CalmSound";
 import { auth, db } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
 import MeditationCarousel from "../components/MeditationCarousel";
 import { Mic, Send } from "lucide-react";
 import PositiveSelfTalk from "../components/PositiveSelfTalk";
@@ -72,52 +80,128 @@ const saveChatToFirestore = async (userText, aiReply) => {
     console.error("❌ Error saving chat:", error);
   }
 };
+  /* ===== NEW: SAVE MOOD ===== */
+  const saveMoodToFirestore = async (emotion) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      await addDoc(collection(db, "users", user.uid, "moods"), {
+        emoji: emotion.emoji,
+        label: emotion.label,
+        time: new Date().toLocaleString(),
+        createdAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("❌ Error saving mood:", error);
+    }
+  };
+
+  /* ===== NEW: LOAD OLD CHATS + MOODS AFTER REFRESH ===== */
+  useEffect(() => {
+    const loadHistory = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const snap = await getDocs(
+          query(
+            collection(db, "users", user.uid, "chats"),
+            orderBy("createdAt", "asc"),
+            limit(50)
+          )
+        );
+        if (!snap.empty) {
+          const loaded = [];
+          snap.forEach((d) => {
+            const data = d.data();
+            if (data.message) loaded.push({ from: "user", text: data.message });
+            if (data.reply) loaded.push({ from: "ai", text: data.reply });
+          });
+          setMessages(loaded);
+        }
+      } catch (err) {
+        console.error("Failed to load chat history:", err);
+      }
+
+      try {
+        const moodSnap = await getDocs(
+          query(
+            collection(db, "users", user.uid, "moods"),
+            orderBy("createdAt", "asc"),
+            limit(50)
+          )
+        );
+        if (!moodSnap.empty) {
+          const loadedMoods = [];
+          moodSnap.forEach((d) => {
+            const data = d.data();
+            loadedMoods.push({
+              emoji: data.emoji,
+              label: data.label,
+              time: data.time || "",
+            });
+          });
+          setEmotions(loadedMoods);
+        }
+      } catch (err) {
+        console.error("Failed to load mood history:", err);
+      }
+    };
+
+    loadHistory();
+  }, []);
+
   /* ===== SEND MESSAGE (BACKEND CONNECTED) ===== */
   const sendMessage = async () => {
-  if (!input.trim()) return;
+    if (!input.trim()) return;
 
-  const userText = input;
-  const detectedEmotion = detectEmotionFromText(userText);
+    const userText = input;
+    const detectedEmotion = detectEmotionFromText(userText);
 
-  // Add user message instantly
-  setMessages((prev) => [...prev, { from: "user", text: userText }]);
-  setIsTyping(true);
-  setInput("");
+    // NEW: last few messages so Saathi remembers the conversation
+    const recentHistory = messages.slice(-10).map((m) => ({
+      role: m.from === "user" ? "user" : "assistant",
+      content: m.text,
+    }));
+    const uid = auth.currentUser?.uid;
 
-  if (detectedEmotion) {
-    setEmotions((prev) => [
-      ...prev,
-      { ...detectedEmotion, time: new Date().toLocaleString() },
-    ]);
-  }
+    // Add user message instantly
+    setMessages((prev) => [...prev, { from: "user", text: userText }]);
+    setIsTyping(true);
+    setInput("");
 
-  try {
-    const data = await sendChatMessage(userText);
-
-    setIsTyping(false);
-
-    // Add AI reply
-    setMessages((prev) => [
-      ...prev,
-      { from: "ai", text: data.reply },
-    ]);
-
-    // 🔥 SAVE TO FIRESTORE
-    await saveChatToFirestore(userText, data.reply);
-
-    if (data.crisis === true) {
-      setShowCrisis(true);
+    if (detectedEmotion) {
+      setEmotions((prev) => [
+        ...prev,
+        { ...detectedEmotion, time: new Date().toLocaleString() },
+      ]);
+      saveMoodToFirestore(detectedEmotion); // NEW
     }
 
-  } catch (err) {
-    setIsTyping(false);
+    try {
+      const data = await sendChatMessage(userText, uid, recentHistory); // CHANGED
 
-    setMessages((prev) => [
-      ...prev,
-      { from: "ai", text: "I’m having trouble connecting right now 💙" },
-    ]);
-  }
-};
+      setIsTyping(false);
+
+      // Add AI reply
+      setMessages((prev) => [...prev, { from: "ai", text: data.reply }]);
+
+      // 🔥 SAVE TO FIRESTORE
+      await saveChatToFirestore(userText, data.reply);
+
+      if (data.crisis === true) {
+        setShowCrisis(true);
+      }
+    } catch (err) {
+      setIsTyping(false);
+
+      setMessages((prev) => [
+        ...prev,
+        { from: "ai", text: "I’m having trouble connecting right now 💙" },
+      ]);
+    }
+  };
 
   const openBreathe = () => {
     setShowGround(false);

@@ -1,5 +1,3 @@
-# backend/utils/groq_client.py
-
 import os
 from groq import Groq
 from dotenv import load_dotenv
@@ -8,9 +6,10 @@ load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-SYSTEM_PROMPT = """
-You are Saathi 🌸
+# Tries the first model; if it fails (e.g. rate limit), tries the next.
+MODELS = ["openai/gpt-oss-20b", "llama-3.3-70b-versatile"]
 
+SYSTEM_PROMPT = """
 You are Saathi 🌸
 
 Identity:
@@ -37,31 +36,41 @@ Behavior:
 - Be supportive when the user is sad.
 - Be playful when the user is casual.
 - Ask small friendly questions sometimes.
-- If the user is quiet, gently start conversation.
-
-Examples of good tone:
-"I'm here with you 😊 What’s going on?"
-"That sounds like a long day… want to talk about it?"
-"You seem a bit quiet today 🌸 Everything okay?"
+- Use earlier messages in this chat to stay consistent; don't repeat
+  questions the user already answered.
 
 Remember:
-You are Saathi, a supportive friend — not a therapist, parent, or assistant.
+You are Saathi, a supportive friend, not a therapist, parent, or assistant.
+If someone talks about self-harm, gently encourage them to reach out to a
+real person or a helpline right now.
 """
 
-def ask_mixtral(prompt: str):
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=80,
-            temperature=0.7,
-        )
 
-        return response.choices[0].message.content.strip()
+def ask_mixtral(prompt: str, history: list | None = None) -> str:
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    except Exception as e:
-        print("Groq Error:", e)
-        return "I’m having trouble connecting right now."
+    for turn in (history or [])[-10:]:
+        if turn.get("role") in ("user", "assistant") and turn.get("content"):
+            messages.append({"role": turn["role"], "content": turn["content"]})
+
+    messages.append({"role": "user", "content": prompt})
+
+    for model in MODELS:
+        try:
+            kwargs = dict(
+                model=model,
+                messages=messages,
+                max_completion_tokens=300,
+                temperature=0.7,
+            )
+            if model.startswith("openai/gpt-oss"):
+                kwargs["reasoning_effort"] = "low"
+
+            response = client.chat.completions.create(**kwargs)
+            text = (response.choices[0].message.content or "").strip()
+            if text:
+                return text
+        except Exception as e:
+            print(f"Groq error on {model}:", e)
+
+    return "I'm having trouble connecting right now."
