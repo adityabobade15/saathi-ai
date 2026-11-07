@@ -1,4 +1,4 @@
-🧠 AI-Powered Mental Health Companion
+# 🧠 AI-Powered Mental Health Companion
 
 An AI-powered mental health companion designed to provide emotional support, mood tracking, and wellness guidance through intelligent conversation.
 This project is built collaboratively with a clear separation of backend and frontend responsibilities.
